@@ -1,0 +1,114 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                           ICT Core Content Tools |
+//|                                      PSI Full Version            |
+//|                                      Developer's Site: forexroboteasy.com |
+//|                                      Developer: Forex Robot Easy Team |
+//+------------------------------------------------------------------+
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Trade\PositionInfo.mqh>
+#include <Trade\SymbolInfo.mqh>
+
+// Define constants
+#define CBDR_TOOL_ID 1001
+#define ASIAN_RANGE_TOOL_ID 1002
+#define SEEK_DESTROY_TOOL_ID 1003
+#define IPDA_TOOL_ID 1004
+#define GMT0_LINE_TOOL_ID 1005
+#define DAILY_DIVIDER_TOOL_ID 1006
+
+// Define global variables
+CTrade trade;
+CPositionInfo positionInfo;
+CSymbolInfo symbolInfo;
+
+//+------------------------------------------------------------------+
+//| Script program start function                                    |
+//+------------------------------------------------------------------+
+void OnStart()
+{
+   // Initialize trade class
+   trade.SetExpertMagicNumber(123456);
+
+   // Subscribe to necessary tools
+   trade.SubscribeTool(CBDR_TOOL_ID);
+   trade.SubscribeTool(ASIAN_RANGE_TOOL_ID);
+   trade.SubscribeTool(SEEK_DESTROY_TOOL_ID);
+   trade.SubscribeTool(IPDA_TOOL_ID);
+   trade.SubscribeTool(GMT0_LINE_TOOL_ID);
+   trade.SubscribeTool(DAILY_DIVIDER_TOOL_ID);
+
+   // Check if tools are available
+   if (!trade.IsToolAvailable(CBDR_TOOL_ID) ||
+       !trade.IsToolAvailable(ASIAN_RANGE_TOOL_ID) ||
+       !trade.IsToolAvailable(SEEK_DESTROY_TOOL_ID) ||
+       !trade.IsToolAvailable(IPDA_TOOL_ID) ||
+       !trade.IsToolAvailable(GMT0_LINE_TOOL_ID) ||
+       !trade.IsToolAvailable(DAILY_DIVIDER_TOOL_ID))
+   {
+      Print('Error: Tools not available!');
+      return;
+   }
+
+   // Subscribe to necessary events
+   trade.SubscribeToPositionCloseEvent();
+
+   // Calculate trading signals based on ICT Core content concepts
+   double signal = CalculateTradingSignal();
+
+   // Place trade based on trading signal
+   if (signal > 0)
+   {
+      trade.Buy(0.1);
+   }
+   else if (signal < 0)
+   {
+      trade.Sell(0.1);
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Calculate trading signal based on ICT Core content concepts       |
+//+------------------------------------------------------------------+
+double CalculateTradingSignal()
+{
+   // Retrieve CBDR tool data
+   double cbdrValue = trade.GetToolValue(CBDR_TOOL_ID);
+
+   // Retrieve Asian Range tool data
+   double asianRangeValue = trade.GetToolValue(ASIAN_RANGE_TOOL_ID);
+
+   // Retrieve Seek & Destroy tool data
+   double seekDestroyValue = trade.GetToolValue(SEEK_DESTROY_TOOL_ID);
+
+   // Retrieve IPDA tool data
+   double ipdaValue = trade.GetToolValue(IPDA_TOOL_ID);
+
+   // Retrieve GMT0 Line tool data
+   double gmt0LineValue = trade.GetToolValue(GMT0_LINE_TOOL_ID);
+
+   // Retrieve Daily Divider tool data
+   double dailyDividerValue = trade.GetToolValue(DAILY_DIVIDER_TOOL_ID);
+
+   // Calculate trading signal based on tool data
+   double signal = cbdrValue + asianRangeValue + seekDestroyValue + ipdaValue + gmt0LineValue + dailyDividerValue;
+
+   return signal;
+}
+
+//+------------------------------------------------------------------+
+//| Handle position close event                                      |
+//+------------------------------------------------------------------+
+void OnPositionClose()
+{
+   // Retrieve closed position information
+   CPositionInfo closedPosition = positionInfo.ClosedPositions().Last();
+
+   // Process closed position data
+   // ...
+
+   // Print the result
+   Print('Position closed: ', closedPosition.PositionTicket());
+}
